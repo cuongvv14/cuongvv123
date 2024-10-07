@@ -1,0 +1,9 @@
+@import "@core/scss/base/bootstrap-extended/include"; // Bootstrap includes
+@import "@core/scss/base/pages/page-auth.scss";
+@import "~ngx-toastr/toastr.css";
+
+.auth-help-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}

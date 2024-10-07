@@ -1,0 +1,17 @@
+@import "@core/scss/angular/libs/datatables.component.scss";
+@import "@core/scss/base/pages/app-user.scss";
+@import "@core/scss/angular/libs/select.component.scss";
+@import "~ngx-toastr/toastr.css";
+/* Red border for invalid input */
+/* Red border for invalid input fields */
+input.is-invalid {
+  border-color: #e74c3c !important; /* Red border */
+  box-shadow: none; /* Remove any extra shadow */
+}
+
+/* Red color for error messages */
+.invalid-feedback {
+  color: #e74c3c; /* Red color for error text */
+  margin-top: 5px;
+  font-size: 14px;
+}

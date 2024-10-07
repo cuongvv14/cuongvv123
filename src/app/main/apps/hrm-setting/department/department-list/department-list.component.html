@@ -1,0 +1,376 @@
+<div class="content-wrapper p-0">
+  <div class="content-body">
+    <!-- User List -->
+    <section class="users-list-wrapper">
+      <!-- users filter start -->
+      <div class="card">
+        <h5 class="card-header">Search Filter</h5>
+        <div class="card-body">
+          <div class="users-list-filter">
+            <form>
+              <div class="row">
+                <div class="col-12 col-md-4">
+                  <fieldset class="form-group">
+                    <ng-select
+                      [items]="branches"
+                      [(ngModel)]="selectBranch"
+                      name="selectedRole1"
+                      bindLabel="name"
+                      placeholder="Select Role"
+                      (change)="filterByRole($event)"
+                    ></ng-select>
+                  </fieldset>
+                </div>
+                <div class="col-12 col-md-4">
+                  <fieldset class="form-group">
+                    <ng-select
+                      [items]="selectPlan"
+                      [(ngModel)]="selectedPlan1"
+                      name="selectedPlan1"
+                      bindLabel="name"
+                      placeholder="Select Plan"
+                      (change)="filterByPlan($event)"
+                    ></ng-select>
+                  </fieldset>
+                </div>
+                <div class="col-12 col-md-4">
+                  <fieldset class="form-group">
+                    <ng-select
+                      [items]="selectStatus"
+                      [(ngModel)]="selectedStatus1"
+                      name="selectedStatus1"
+                      bindLabel="name"
+                      placeholder="Select Status"
+                      (change)="filterByStatus($event)"
+                    ></ng-select>
+                  </fieldset>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- users filter end -->
+
+      <div class="card">
+        <div class="row">
+          <div class="col-md-6 col-12">
+            <div class="d-flex justify-content-between align-items-center m-1">
+              <label class="d-flex align-items-center"
+                >Xem
+                <select class="form-control mx-25" [(ngModel)]="selectedOption">
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+                mục</label
+              >
+            </div>
+          </div>
+          <div
+            class="col-md-6 col-12 d-flex justify-content-start justify-content-md-end"
+          >
+            <div
+              class="d-flex align-items-center justify-content-end pr-1 pb-1 pb-md-0"
+            >
+              <label class="d-flex align-items-center ml-1 ml-md-0"
+                >Tìm kiếm:<input
+                  [(ngModel)]="searchValue1"
+                  name="searchValue1"
+                  type="search"
+                  class="form-control ml-25"
+                  (keyup)="filterUpdate($event)"
+                  (search)="filterUpdate($event)"
+              /></label>
+              <button
+                class="btn btn-primary ml-1"
+                rippleEffect
+                (click)="openAddModal(modalBasic)"
+              >
+                <i
+                  data-feather="plus"
+                  class="d-sm-none d-inline-block mr-0 mr-sm-1"
+                ></i
+                ><span class="d-none d-sm-inline-block">Thêm Phòng Ban</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="loading" class="text-center my-3">
+          <span class="spinner-border spinner-border-lg"></span> Đang tải dữ
+          liệu...
+        </div>
+        <!-- Replacing ngx-datatable with p-treeTable -->
+        <p-treeTable *ngIf="!loading" [value]="departments" [columns]="cols">
+          <ng-template pTemplate="header" let-columns>
+            <tr>
+              <th *ngFor="let col of columns">
+                {{ col.header }}
+              </th>
+              <th style="width: 10rem">
+                <p-button icon="pi pi-cog"></p-button>
+              </th>
+            </tr>
+          </ng-template>
+
+          <ng-template
+            pTemplate="body"
+            let-rowNode
+            let-rowData="rowData"
+            let-columns="columns"
+          >
+            <tr>
+              <td *ngFor="let col of columns; let i = index">
+                <p-treeTableToggler
+                  [rowNode]="rowNode"
+                  *ngIf="i == 0"
+                ></p-treeTableToggler>
+                {{ rowData[col.field] }}
+              </td>
+              <td>
+                <!-- Action buttons for details, edit, and delete -->
+                <button
+                  type="button"
+                  (click)="openDetailsModal(modalBasic, rowData)"
+                  class="btn btn-sm btn-icon"
+                >
+                  <span [data-feather]="'file-text'" [size]="16"></span>
+                </button>
+                <button
+                  type="button"
+                  (click)="openEditModal(modalBasic, rowData)"
+                  class="btn btn-sm btn-icon"
+                >
+                  <span [data-feather]="'edit'" [size]="16"></span>
+                </button>
+                <button
+                  type="button"
+                  (click)="openDeleteModal(modalDelete, rowData)"
+                  class="btn btn-sm btn-icon"
+                >
+                  <span [data-feather]="'trash'" [size]="16"></span>
+                </button>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="summary">
+            <div style="text-align: left">
+              <p-button icon="pi pi-refresh"></p-button>
+            </div>
+          </ng-template>
+        </p-treeTable>
+        <!-- End of p-treeTable -->
+      </div>
+    </section>
+    <!--/ User List -->
+  </div>
+
+  <!-- New modal -->
+  <ng-template #modalBasic let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="myModalLabel1">
+        <ng-container *ngIf="modalMode === 'add'"
+          >Thêm mới chi nhánh</ng-container
+        >
+        <ng-container *ngIf="modalMode === 'edit'"
+          >Chỉnh sửa chi nhánh</ng-container
+        >
+        <ng-container *ngIf="modalMode === 'view'"
+          >Xem chi tiết chi nhánh</ng-container
+        >
+      </h4>
+      <button
+        type="button"
+        class="close"
+        (click)="modal.dismiss('Cross click')"
+        aria-label="Close"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body" tabindex="0" ngbAutofocus>
+      <div class="form-area">
+        <form [formGroup]="form" (ngSubmit)="onSubmitReactiveForm(modal)">
+          <div class="form-group">
+            <label for="departmentName">Tên phòng ban</label>
+            <input
+              type="text"
+              id="departmentName"
+              placeholder="Tên phòng ban"
+              class="form-control"
+              name="departmentName"
+              formControlName="departmentName"
+              [ngClass]="{
+                'is-invalid':
+                  DepartmentName?.touched && DepartmentName?.invalid,
+                'is-valid': DepartmentName?.valid
+              }"
+            />
+            <div
+              *ngIf="DepartmentName?.touched && DepartmentName?.invalid"
+              class="invalid-feedback"
+            >
+              <div *ngIf="DepartmentName.errors?.['required']">
+                Tên phòng ban là bắt buộc
+              </div>
+              <div *ngIf="DepartmentName.errors?.['minlength']">
+                Tên phòng ban phải có ít nhất 5 ký tự
+              </div>
+              <div *ngIf="DepartmentName.errors?.['maxlength']">
+                Tên phòng ban không được vượt quá 255 ký tự
+              </div>
+              <div *ngIf="DepartmentName.errors?.['pattern']">
+                Tên phòng ban không được là số
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="">Cấp độ:</label>
+            <input
+              type="input"
+              placeholder="Cấp độ "
+              class="form-control"
+              name="level"
+              formControlName="level"
+              [ngClass]="{
+                'is-invalid': Level?.touched && Level?.invalid,
+                'is-valid': Level?.valid
+              }"
+            />
+            <div
+              *ngIf="Level?.touched && Level?.invalid"
+              class="invalid-feedback"
+            >
+              <div *ngIf="Level?.errors?.['required']">Cấp độ là bắt buộc</div>
+              <div *ngIf="Level?.errors?.['minlength']">
+                Cấp độ phải có ít nhất 1 ký tự
+              </div>
+              <div *ngIf="Level?.errors?.['maxlength']">
+                Cấp độ không được vượt quá 10 ký tự
+              </div>
+              <div *ngIf="Level?.errors?.['pattern']">Cấp độ phải là số</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="branch">Tên chi nhánh:</label>
+            <ng-select
+              [items]="branches"
+              bindLabel="branchName"
+              bindValue="id"
+              formControlName="branchId"
+              placeholder="Chọn chi nhánh"
+              (change)="onBranchChange($event)"
+              [ngClass]="{
+                'is-invalid': BranchId.touched && BranchId.invalid,
+                'is-valid': BranchId.valid
+              }"
+            >
+            </ng-select>
+            <div
+              class="alert alert-danger"
+              *ngIf="BranchId.touched && BranchId.invalid"
+            >
+              <div *ngIf="BranchId.errors?.['required']">
+                Chi nhánh là bắt buộc
+              </div>
+              <div *ngIf="BranchId.errors?.['pattern']">
+                Chi nhánh không hợp lệ
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="parentDepartment">Phòng ban gốc:</label>
+            <ng-select
+              [items]="filteredDepartments"
+              bindLabel="departmentName"
+              bindValue="id"
+              formControlName="parentDepartmentId"
+              placeholder="Chọn phòng ban gốc"
+              [ngClass]="{
+                'is-invalid':
+                  ParentDepartmentId.touched && ParentDepartmentId.invalid,
+                'is-valid': ParentDepartmentId.valid
+              }"
+            >
+            </ng-select>
+            <div
+              class="invalid-feedback"
+              *ngIf="ParentDepartmentId.touched && ParentDepartmentId.invalid"
+            >
+              <div *ngIf="ParentDepartmentId.errors?.['required']">
+                Phòng ban gốc là bắt buộc
+              </div>
+              <div *ngIf="ParentDepartmentId.errors?.['pattern']">
+                Phòng ban gốc không hợp lệ
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              *ngIf="modalMode === 'view'"
+              type="button"
+              class="btn btn-secondary"
+              (click)="modal.close()"
+            >
+              Đóng
+            </button>
+            <button
+              *ngIf="modalMode !== 'view'"
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="form.invalid"
+            >
+              Lưu
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #modalDelete let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">Xác nhận xóa</h5>
+      <button
+        type="button"
+        class="close"
+        aria-label="Close"
+        (click)="modal.dismiss('Cross click')"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>
+        Bạn có chắc chắn muốn xóa
+        <strong>{{ selectedDepartment?.departmentName }}</strong> không?
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="modal.dismiss('cancel')"
+      >
+        Hủy
+      </button>
+      <button
+        type="button"
+        class="btn btn-danger"
+        (click)="deleteDepartment(modal)"
+        [disabled]="deleteLoading"
+      >
+        <span
+          *ngIf="deleteLoading"
+          class="spinner-border spinner-border-sm mr-1"
+        ></span>
+        Xóa
+      </button>
+    </div>
+  </ng-template>
+</div>

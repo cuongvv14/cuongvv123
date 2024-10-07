@@ -1,0 +1,359 @@
+<div class="content-wrapper p-0">
+  <div class="content-body">
+    <!-- User List -->
+    <section class="users-list-wrapper">
+
+      <div class="card">
+        <div class="row">
+          <div class="col-md-6 col-12">
+            <div class="d-flex justify-content-between align-items-center m-1">
+              <label class="d-flex align-items-center"><span>Xem</span>
+                <select class="form-control mx-25" [(ngModel)]="selectedOption">
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+                <span>mục</span></label>
+            </div>
+          </div>
+          <div class="col-md-6 col-12 d-flex justify-content-start justify-content-md-end">
+            <div class="d-flex align-items-center justify-content-end pr-1 pb-1 pb-md-0">
+              <label class="d-flex align-items-center ml-1 ml-md-0">Tìm Kiếm:<input [(ngModel)]="searchValue1"
+                  name="searchValue1" type="search" class="form-control ml-25" (keyup)="filterUpdate($event)"
+                  (search)="filterUpdate($event)" /></label>
+              <button class="btn btn-primary ml-1" rippleEffect (click)="openAddModal(modalBasic)">
+                <i data-feather="plus" class="d-inline-block"></i> <!-- Icon dấu cộng -->
+              </button>
+
+              <!-- Nút Delete với icon delete -->
+              <button class="btn btn-danger ml-1" rippleEffect (click)="openDeleteModal(modalDelete)"
+                [disabled]="selectedIds.length === 0">
+                <i data-feather="trash" class="d-inline-block"></i> <!-- Icon delete -->
+              </button>
+
+            </div>
+          </div>
+        </div>
+        <div *ngIf="loading" class="text-center my-3">
+          <span class="spinner-border spinner-border-lg"></span> Đang tải dữ liệu...
+        </div>
+        <ngx-datatable *ngIf="!loading" [rows]="rows" [rowHeight]="50" class="bootstrap core-bootstrap"
+          [limit]="selectedOption" [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="50"
+          [scrollbarH]="true" [selectionType]="SelectionType.checkbox" [limit]="selectedOption"
+          (select)=" onSelect($event)" (activate)="onActivate($event)">
+          <ngx-datatable-column [width]="50" [sortable]="false" [canAutoResize]="false" [draggable]="false"
+            [resizeable]="false">
+            <ng-template ngx-datatable-header-template let-value="value" let-allRowsSelected="allRowsSelected"
+              let-selectFn="selectFn">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" [checked]="allRowsSelected"
+                  (change)="selectFn(!allRowsSelected)" id="headerChkbxRef" />
+                <label class="custom-control-label" for="headerChkbxRef"></label>
+              </div>
+            </ng-template>
+            <ng-template ngx-datatable-cell-template let-rowIndex="rowIndex" let-value="value"
+              let-isSelected="isSelected" let-onCheckboxChangeFn="onCheckboxChangeFn">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" [checked]="isSelected"
+                  (change)="onCheckboxChangeFn($event)" id="rowChkbxRef{{ rowIndex }}" />
+                <label class="custom-control-label" for="rowChkbxRef{{ rowIndex }}"></label>
+              </div>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Thao Tác" [width]="100" [sortable]="false">
+            <ng-template ngx-datatable-cell-template let-row="row">
+              <div class="d-flex justify-content-between">
+                <!-- Button for Details modal -->
+                <button type="button" (click)="openDetailsModal(modalBasic, row)" class="btn btn-sm btn-icon">
+                  <span [data-feather]="'file-text'" [size]="16"></span>
+                </button>
+
+                <!-- Button for Edit modal -->
+                <button type="button" (click)="openEditModal(modalBasic, row)" class="btn btn-sm btn-icon">
+                  <span [data-feather]="'edit'" [size]="16"></span>
+                </button>
+
+                <!-- Button for Delete modal -->
+                <button type="button" (click)="openDeleteModal(modalDelete, row)" class="btn btn-sm btn-icon">
+                  <span [data-feather]="'trash'" [size]="16"></span>
+                </button>
+              </div>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Tên Chi Nhánh" prop="branchName" [width]="100">
+            <ng-template let-row="row" let-name="value" ngx-datatable-cell-template>
+              <div class="d-flex align-items-center">
+                <!-- <div class="avatar mr-1 ml-0" [ngClass]="{
+                  'bg-light-success': row.status === 'active',
+                  'bg-light-secondary': row.status === 'inactive',
+                  'bg-light-warning': row.status === 'pending'
+                }">
+                  <div class="avatar-content">{{ name | initials }}</div>
+                </div> -->
+                <ng-template #customAvatar>
+                  <div class="avatar mr-1 ml-0" [ngClass]="{
+                      'bg-light-success': row.status == 'active',
+                      'bg-light-secondary': row.status == 'inactive',
+                      'bg-light-warning': row.status == 'pending'
+                    }">
+                    <div class="avatar-content">{{ name | initials }}</div>
+                  </div>
+                </ng-template>
+                <div class="cell-line-height">
+                  <button type="button" (click)="openDetailsModal(modalBasic, row)"
+                    class="btn btn-sm btn-icon text-primary h5">
+                    {{ name }}
+                  </button>
+                </div>
+              </div>
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Email" prop="email" [width]="100"></ngx-datatable-column>
+          <ngx-datatable-column name="Địa Chỉ" prop="address" [width]="400">
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              <span>{{ row.specificAddress + ', ' + row.ward + ', ' + row.district + ', ' + row.province || 'N/A'
+                }}</span>
+            </ng-template>
+          </ngx-datatable-column>
+          <!-- <ngx-datatable-column name="Mã Số Thuế" prop="taxCode" [width]="50"></ngx-datatable-column> -->
+          <ngx-datatable-column name="Sdt" prop="phoneNumber" [width]="50"></ngx-datatable-column>
+        </ngx-datatable>
+      </div>
+    </section>
+    <!--/ User List -->
+  </div>
+
+  <!-- New Branch -->
+
+  <ng-template #modalBasic let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="myModalLabel1">
+        <ng-container *ngIf="modalMode === 'add'">Thêm mới chi nhánh</ng-container>
+        <ng-container *ngIf="modalMode === 'edit'">Chỉnh sửa chi nhánh</ng-container>
+        <ng-container *ngIf="modalMode === 'view'">Xem chi tiết chi nhánh</ng-container>
+      </h4>
+      <button type="button" class="close" (click)="onCloseModal(modal)" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body" tabindex="0" ngbAutofocus>
+      <div *ngIf="modalLoading" class="text-center my-3">
+        <span class="spinner-border spinner-border-lg"></span> Đang tải dữ liệu...
+      </div>
+      <div class="form-area" *ngIf="!modalLoading">
+        <form [formGroup]="form" (ngSubmit)="onSubmitReactiveForm(modal)">
+          <!-- Tên chi nhánh -->
+          <div class="form-group">
+            <label for="branchName">Tên chi nhánh <span class="text-danger">(*)</span></label>
+            <input type="text" class="form-control" placeholder="Tên chi nhánh" formControlName="branchName" [ngClass]="{
+                'is-invalid': form.controls['branchName'].touched && form.controls['branchName'].invalid,
+                'is-valid': form.controls['branchName'].touched && form.controls['branchName'].valid
+              }" />
+            <div class="invalid-feedback"
+              *ngIf="form.controls['branchName'].touched && form.controls['branchName'].invalid">
+              <div *ngIf="form.controls['branchName'].errors?.required">
+                Tên chi nhánh là bắt buộc
+              </div>
+              <div *ngIf="
+                  form.controls['branchName'].errors?.minlength || form.controls['branchName'].errors?.maxlength
+                ">
+                Tên chi nhánh phải có ít nhất 2 ký tự và tối đa 255 ký tự
+              </div>
+              <div *ngIf="form.controls['branchName'].errors?.duplicate">
+                Tên chi nhánh đã tồn tại.
+              </div>
+              <div *ngIf="form.controls['branchName'].errors?.apiError">
+                <div *ngFor="let error of form.controls['branchName'].errors?.apiError">{{ error }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Địa chỉ -->
+
+          <!-- Tỉnh/Thành phố -->
+          <div class="form-row">
+            <!-- Tỉnh/Thành phố -->
+            <div class="form-group col-md-4">
+              <label for="province">Tỉnh/Thành phố <span class="text-danger">(*)</span></label>
+              <ng-select [items]="provinces" bindLabel="name" bindValue="code" formControlName="province"
+                placeholder="Chọn Tỉnh/Thành phố" (change)="onProvinceChange($event)">
+              </ng-select>
+              <div *ngIf="form.controls['province'].touched && form.controls['province'].invalid" class="text-danger">
+                <div *ngIf="form.controls['province'].errors?.required">Tỉnh/Thành phố là bắt buộc</div>
+                <div *ngIf="form.controls['province'].errors?.apiError">
+                  <div *ngFor="let error of form.controls['province'].errors?.apiError">{{ error }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quận/Huyện -->
+            <div class="form-group col-md-4">
+              <label for="district">Quận/Huyện <span class="text-danger">(*)</span></label>
+              <ng-select [items]="districts" bindLabel="name" bindValue="code" formControlName="district"
+                placeholder="Chọn Quận/Huyện" (change)="onDistrictChange($event)">
+              </ng-select>
+              <div *ngIf="form.controls['district'].touched && form.controls['district'].invalid" class="text-danger">
+                <div *ngIf="form.controls['district'].errors?.required">Quận/Huyện là bắt buộc</div>
+                <div *ngIf="form.controls['district'].errors?.apiError">
+                  <div *ngFor="let error of form.controls['district'].errors?.apiError">{{ error }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Xã/Phường -->
+            <div class="form-group col-md-4">
+              <label for="ward">Xã/Phường <span class="text-danger">(*)</span></label>
+              <ng-select [items]="wards" bindLabel="name" bindValue="code" formControlName="ward"
+                placeholder="Chọn Xã/Phường" (change)="onWardChange($event)">
+              </ng-select>
+              <div *ngIf="form.controls['ward'].touched && form.controls['ward'].invalid" class="text-danger">
+                <div *ngIf="form.controls['ward'].errors?.required">Xã/Phường là bắt buộc</div>
+                <div *ngIf="form.controls['ward'].errors?.apiError">
+                  <div *ngFor="let error of form.controls['ward'].errors?.apiError">{{ error }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Địa chỉ cụ thể -->
+          <div class="form-group">
+            <label for="specificAddress">Địa chỉ cụ thể <span class="text-danger">(*)</span></label>
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text">
+                  <i class="fa fa-map-marker"></i>
+                </span>
+              </div>
+              <input type="text" class="form-control" formControlName="specificAddress"
+                placeholder="Nhập địa chỉ cụ thể" [ngClass]="{
+                  'is-invalid':
+                    form.controls['specificAddress'].touched && form.controls['specificAddress'].invalid,
+                  'is-valid': form.controls['specificAddress'].touched && form.controls['specificAddress'].valid
+                }" />
+              <div class="invalid-feedback"
+                *ngIf="form.controls['specificAddress'].touched && form.controls['specificAddress'].invalid">
+                <div *ngIf="form.controls['specificAddress'].errors?.required">
+                  Địa chỉ cụ thể là bắt buộc
+                </div>
+                <div *ngIf="
+                    form.controls['specificAddress'].errors?.minlength ||
+                    form.controls['specificAddress'].errors?.maxlength
+                  ">
+                  Địa chỉ phải có ít nhất 3 ký tự và tối đa 255 ký tự
+                </div>
+                <div *ngIf="form.controls['specificAddress'].errors?.apiError">
+                  <div *ngFor="let error of form.controls['specificAddress'].errors?.apiError">{{ error }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label for="email">Email <span class="text-danger">(*)</span></label>
+            <input type="email" class="form-control" placeholder="Email" formControlName="email" [ngClass]="{
+                'is-invalid': form.controls['email'].touched && form.controls['email'].invalid,
+                'is-valid': form.controls['email'].touched && form.controls['email'].valid
+              }" />
+            <div class="invalid-feedback" *ngIf="form.controls['email'].touched && form.controls['email'].invalid">
+              <div *ngIf="form.controls['email'].errors?.required">Email là bắt buộc</div>
+              <div *ngIf="form.controls['email'].errors?.pattern">Email không hợp lệ</div>
+              <div *ngIf="form.controls['email'].errors?.duplicate">Email đã tồn tại.</div>
+              <div *ngIf="form.controls['email'].errors?.apiError">
+                <div *ngFor="let error of form.controls['email'].errors?.apiError">{{ error }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Số điện thoại -->
+          <div class="form-group">
+            <label for="phoneNumber">Số điện thoại <span class="text-danger">(*)</span></label>
+            <input type="text" class="form-control" placeholder="Số điện thoại" formControlName="phoneNumber" [ngClass]="{
+                'is-invalid': form.controls['phoneNumber'].touched && form.controls['phoneNumber'].invalid,
+                'is-valid': form.controls['phoneNumber'].touched && form.controls['phoneNumber'].valid
+              }" />
+            <div class="invalid-feedback"
+              *ngIf="form.controls['phoneNumber'].touched && form.controls['phoneNumber'].invalid">
+              <div *ngIf="form.controls['phoneNumber'].errors?.required">
+                Số điện thoại là bắt buộc
+              </div>
+              <div *ngIf="form.controls['phoneNumber'].errors?.pattern">
+                Số điện thoại không hợp lệ. Số điện thoại phải là 10 chữ số.
+              </div>
+              <div *ngIf="form.controls['phoneNumber'].errors?.duplicate">
+                Số điện thoại đã tồn tại.
+              </div>
+              <div *ngIf="form.controls['phoneNumber'].errors?.apiError">
+                <div *ngFor="let error of form.controls['phoneNumber'].errors?.apiError">{{ error }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mã số thuế -->
+          <div class="form-group">
+            <label for="taxCode">Mã số thuế <span class="text-danger">(*)</span></label>
+            <input type="text" class="form-control" placeholder="Mã số thuế" formControlName="taxCode" [ngClass]="{
+                'is-invalid': form.controls['taxCode'].touched && form.controls['taxCode'].invalid,
+                'is-valid': form.controls['taxCode'].touched && form.controls['taxCode'].valid
+              }" />
+            <div class="invalid-feedback" *ngIf="form.controls['taxCode'].touched && form.controls['taxCode'].invalid">
+              <div *ngIf="form.controls['taxCode'].errors?.required">Mã số thuế là bắt buộc</div>
+              <div *ngIf="form.controls['taxCode'].errors?.pattern">Mã số thuế không đúng định dạng. Mã số thuế phải là
+                10 hoặc 13
+                số.</div>
+              <div *ngIf="form.controls['taxCode'].errors?.duplicate">
+                Mã số thuế đã tồn tại.
+              </div>
+              <div *ngIf="form.controls['taxCode'].errors?.apiError">
+                <div *ngFor="let error of form.controls['taxCode'].errors?.apiError">{{ error }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer pt-1">
+            <!-- Nếu là chế độ view, chỉ có nút đóng -->
+            <button *ngIf="modalMode === 'view'" type="button" class="btn btn-secondary" (click)="modal.close()">
+              Đóng
+            </button>
+            <!-- Nếu là chế độ add hoặc edit, hiển thị nút lưu -->
+            <button *ngIf="modalMode !== 'view'" type="submit" class="btn btn-primary float-right"
+              [disabled]="form.invalid || formLoading">
+              <span *ngIf="formLoading" class="spinner-border spinner-border-sm mr-1"></span>
+              Lưu
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #modalDelete let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">Xác nhận xóa</h5>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p *ngIf="selectedBranch">
+        Bạn có chắc chắn muốn xóa chi nhánh
+        <strong>{{ selectedBranch?.branchName }}</strong> không?
+      </p>
+      <p *ngIf="!selectedBranch">
+        Bạn có chắc chắn muốn xóa các chi nhánh đã chọn không?
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('cancel')">
+        Hủy
+      </button>
+      <button type="button" class="btn btn-danger" (click)="deleteSelectedBranches(modal)" [disabled]="deleteLoading">
+        <span *ngIf="deleteLoading" class="spinner-border spinner-border-sm mr-1"></span>
+        Xóa
+      </button>
+    </div>
+  </ng-template>
+
+  <!--/ New User Sidebar -->
+</div>

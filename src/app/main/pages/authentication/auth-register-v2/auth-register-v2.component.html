@@ -1,0 +1,247 @@
+<div class="auth-wrapper auth-v2">
+  <div class="auth-inner row m-0">
+    <!-- Brand logo-->
+    <a class="brand-logo" href="javascript:void(0);">
+      <img src="{{ coreConfig.app.appLogoImage }}" alt="brand-logo" height="28" />
+      <h2 class="brand-text text-primary ml-1">{{ coreConfig.app.appName }}</h2>
+    </a>
+    <!-- /Brand logo-->
+    <!-- Left Text-->
+    <div class="d-none d-lg-flex col-lg-8 align-items-center p-5">
+      <div class="w-100 d-lg-flex align-items-center justify-content-center px-5">
+        <img class="img-fluid" [src]="
+            coreConfig.layout.skin === 'dark'
+              ? 'assets/images/pages/register-v2-dark.svg'
+              : 'assets/images/pages/register-v2.svg'
+          " alt="Register V2" />
+      </div>
+    </div>
+    <!-- /Left Text-->
+    <!-- Register-->
+    <div *ngIf="!showOtpForm" class="d-flex col-lg-4 align-items-center auth-bg px-2 p-lg-5">
+      <div class="col-12 col-sm-8 col-md-6 col-lg-12 px-xl-2 mx-auto">
+        <h2 class="card-title font-weight-bold mb-1">Tạo tài khoản</h2>
+        <form class="auth-register-form mt-2" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          <!-- Full Name Field -->
+          <!-- Tên tổ chức Field -->
+          <div class="form-group">
+            <label for="register-fullname" class="form-label">
+              Tên tổ chức <span class="text-danger">(*)</span>
+            </label>
+            <input type="text" formControlName="organizationName" class="form-control" placeholder="HeNo"
+              aria-describedby="register-organizationName" tabindex="1" autofocus [ngClass]="{
+                'is-invalid':
+                  f.organizationName.touched && f.organizationName.errors,
+                'is-valid':
+                  f.organizationName.touched && !f.organizationName.errors
+              }" />
+            <div class="invalid-feedback" *ngIf="f.organizationName.touched && f.organizationName.errors">
+              <div *ngIf="f.organizationName.errors.required">
+                Tên tổ chức là bắt buộc
+              </div>
+              <div *ngIf="f.organizationName.errors.minlength">
+                Tên tổ chức phải ít nhất 5 ký tự
+              </div>
+              <div *ngIf="f.organizationName.errors?.serverError">
+                {{ f.organizationName.errors.serverError }}
+              </div>
+              <!-- Hiển thị lỗi từ server -->
+            </div>
+          </div>
+
+          <!-- Email Field -->
+          <div class="form-group">
+            <label for="register-email" class="form-label">Email <span class="text-danger">(*)</span></label>
+            <input type="text" formControlName="email" class="form-control" placeholder="johndoe@gmail.com"
+              aria-describedby="register-email" tabindex="2" [ngClass]="{
+                'is-invalid': f.email.touched && f.email.errors,
+                'is-valid': f.email.touched && !f.email.errors
+              }" />
+            <div class="invalid-feedback" *ngIf="f.email.touched && f.email.errors">
+              <div *ngIf="f.email.errors.required">Email là bắt buộc</div>
+              <div *ngIf="f.email.errors.pattern">
+                Email phải đúng định dạng
+              </div>
+              <div *ngIf="f.email.errors?.serverError">
+                {{ f.email.errors.serverError }}
+              </div>
+              <!-- Hiển thị lỗi từ server -->
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-group">
+            <label for="register-password" class="form-label">
+              Mật khẩu <span class="text-danger">(*)</span>
+            </label>
+            <div class="input-group">
+              <input [type]="passwordTextType ? 'text' : 'password'" formControlName="password" class="form-control"
+                tabindex="3" placeholder="············" [ngClass]="{
+                  'is-invalid': f.password.touched && f.password.errors,
+                  'is-valid': f.password.touched && !f.password.errors
+                }" />
+              <div class="invalid-feedback" *ngIf="f.password.touched && f.password.errors">
+                <div *ngIf="f.password.errors.required">
+                  Mật khẩu là bắt buộc
+                </div>
+                <div *ngIf="f.password.errors.minlength">
+                  Mật khẩu phải có ít nhất 8 ký tự
+                </div>
+                <div *ngIf="f.password.errors.pattern">
+                  Mật khẩu phải chứa ít nhất một chữ cái hoa, một chữ cái
+                  thường, một số, và một ký tự đặc biệt.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Confirm Password Field -->
+          <div class="form-group">
+            <label for="register-confirm-password" class="form-label">
+              Xác nhận mật khẩu <span class="text-danger">(*)</span>
+            </label>
+            <div class="input-group">
+              <input [type]="confPasswordTextType ? 'text' : 'password'" formControlName="confirmPassword" tabindex="4"
+                class="form-control" placeholder="············" [ngClass]="{
+                  'is-invalid':
+                    f.confirmPassword.touched && f.confirmPassword.errors,
+                  'is-valid':
+                    f.confirmPassword.touched && !f.confirmPassword.errors
+                }" />
+              <div class="invalid-feedback" *ngIf="f.confirmPassword.touched && f.confirmPassword.errors">
+                <div *ngIf="f.confirmPassword.errors.required">
+                  Xác nhận mật khẩu là bắt buộc
+                </div>
+                <div *ngIf="f.confirmPassword.errors.mustMatch">
+                  Mật khẩu xác nhận không khớp
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accept Terms Checkbox -->
+          <div class="form-group">
+            <div class="custom-control custom-checkbox">
+              <input class="custom-control-input" type="checkbox" formControlName="acceptTerms"
+                id="register-privacy-policy" tabindex="5" />
+              <label class="custom-control-label" for="register-privacy-policy">
+                Đồng ý với các
+                <a href="javascript:void(0);" (click)="openTermsModal(termsModal)">
+                  Điều kiện & điều khoản
+                </a>
+              </label>
+            </div>
+            <div class="invalid-feedback" *ngIf="f.acceptTerms.touched && f.acceptTerms.errors">
+              <div *ngIf="f.acceptTerms.errors.requiredTrue">
+                Bạn phải đồng ý với các điều khoản
+              </div>
+            </div>
+          </div>
+
+          <!-- Register Button -->
+          <button [disabled]="registerForm.invalid || loading" class="btn btn-primary btn-block" tabindex="7"
+            rippleEffect>
+            Đăng ký
+          </button>
+        </form>
+
+        <!-- Link to Login -->
+        <p class="text-center mt-2">
+          <span>Bạn đã có tài khoản?</span>
+          <a routerLink="/pages/authentication/login-v2"><span>&nbsp;Đăng nhập</span></a>
+        </p>
+      </div>
+    </div>
+    <!-- /Register-->
+    <div *ngIf="showOtpForm" class="d-flex justify-content-center align-items-center col-lg-4 auth-bg px-2 p-lg-5"
+      style="min-height: 100vh;">
+      <div class="col-12 col-sm-8 col-md-6 col-lg-12 px-xl-2 mx-auto">
+        <h2 class="card-title font-weight-bold mb-1 ">Nhập mã OTP 🔑</h2>
+        <p class="card-text mb-2 ">
+          Nhập OTP được gửi tới email của bạn để xác minh và đặt lại mật khẩu.
+        </p>
+        <form [formGroup]="otpForm" (ngSubmit)="onSubmitOtp()">
+          <div class="form-group row">
+            <!-- Ô nhập OTP và nút Gửi lại OTP -->
+            <div class="col-12 d-flex">
+              <div class="flex-grow-1 position-relative">
+                <label for="otp">OTP</label>
+                <input type="text" id="otp" class="form-control" formControlName="otp" placeholder="Nhập OTP" [ngClass]="{
+                    'is-invalid': fOtp.otp.touched && fOtp.otp.errors,
+                    'is-valid': fOtp.otp.touched && !fOtp.otp.errors
+                  }" />
+                <div *ngIf="fOtp.otp.touched && fOtp.otp.errors" class="invalid-feedback"
+                  style="position: absolute; top: 100%; left: 0;">
+                  <div *ngIf="fOtp.otp.errors.required">OTP là bắt buộc</div>
+                  <div *ngIf="fOtp.otp.errors.minlength || fOtp.otp.errors.maxlength || fOtp.otp.errors.pattern">
+                    OTP phải có đúng 6 chữ số
+                  </div>
+                </div>
+              </div>
+              <div class="ml-2 d-flex align-items-end">
+                <button type="button" class="btn btn-primary" (click)="resendOtp()" [disabled]="resendingOtp">
+                  Gửi lại OTP
+                </button>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block mt-3">
+            Xác minh OTP
+          </button>
+        </form>
+        <!-- Thông điệp gửi lại OTP -->
+        <div *ngIf="resendOtpMessage" class="text-success text-center mt-2">
+          {{ resendOtpMessage }}
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Modal Điều kiện & điều khoản -->
+    <ng-template #termsModal let-modal>
+      <div class="modal-dialog modal-lg"> <!-- Thêm class modal-lg để mở rộng modal -->
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel1">
+              Điều kiện & Điều khoản
+            </h4>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+            <!-- Giới hạn chiều cao và thêm scroll -->
+            <h6 class="text-info">1. Đăng ký tài khoản</h6>
+            <p>
+              Khi đăng ký tài khoản, bạn cần cung cấp thông tin chính xác, đầy đủ và hiện hành. Bạn chịu trách nhiệm về
+              tính chính xác và bảo mật của thông tin tài khoản. Nếu phát hiện hành vi sử dụng tài khoản của bạn không
+              đúng cách, bạn có trách nhiệm báo cáo ngay cho chúng tôi.
+            </p>
+
+            <h6 class="text-info">2. Quyền và nghĩa vụ của người dùng</h6>
+            <p>
+              Khi sử dụng dịch vụ, bạn phải tuân thủ mọi quy định pháp luật và không được thực hiện các hành vi vi phạm
+              pháp luật, gây tổn hại đến người khác hoặc làm ảnh hưởng đến hoạt động của dịch vụ.
+            </p>
+
+            <h6 class="text-info">3. Quyền sở hữu trí tuệ</h6>
+            <p>
+              Nội dung trên trang web bao gồm nhưng không giới hạn: văn bản, hình ảnh, logo, và các tài liệu khác thuộc
+              quyền sở hữu của chúng tôi hoặc các bên liên quan. Bạn không được phép sao chép, tái bản hoặc phân phối
+              bất kỳ nội dung nào mà không có sự cho phép bằng văn bản từ chúng tôi.
+            </p>
+
+            <!-- Thêm nội dung điều khoản khác vào đây -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="modal.close('Close click')">
+              Đóng
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+  </div>
+</div>
